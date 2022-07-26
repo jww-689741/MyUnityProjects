@@ -14,16 +14,8 @@ public class SignUp : UI_Popup
     private enum Texts { SignupStateLog, ChackIDLog }
 
     private bool idCheckFlag = false;
-
-    // 아이디 생성 규칙 정규식 ( 숫자, 영문자 최소 1개 이상, 최소 6문자 이상 )
-    private Regex idNormalPattern = new Regex(@"^(?=.*?[a-z])(?=.*?[0-9]).{6,}$", RegexOptions.IgnorePatternWhitespace);
-
-    // 비밀번호 생성 규칙 정규식 ( 숫자, 영문자, 특수문자 최소 1개 이상, 최소 10문자 이상 )
-    private Regex passwordNormalPattern = new Regex(@"^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{10,}$", RegexOptions.IgnorePatternWhitespace);
-
-    // 주민등록번호 규칙 정규식
-    private Regex rrnNormalPattern = new Regex(@"(\d{6}[ ,-]-?[1-4]\d{6})|(\d{6}[ ,-]?[1-4])", RegexOptions.IgnorePatternWhitespace);
-
+    private float timerInterval = 1.0f;
+    private float timerLimit = 5.0f;
 
     // 오브젝트가 활성상태일 경우 실행
     private void Start()
@@ -73,7 +65,7 @@ public class SignUp : UI_Popup
             log.text = "성명을 입력해주세요";
             return;
         }
-        else if(!rrnNormalPattern.IsMatch(rrn) || rrn == null)
+        else if(!DataManager.Instance.rrnNormalPattern.IsMatch(rrn) || rrn == null)
         {
             Debug.Log(rrn);
             log.color = UIManager.Instance.errorLogColor;
@@ -87,7 +79,9 @@ public class SignUp : UI_Popup
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
             log.color = UIManager.Instance.successLogColor;
-            log.text = "회원가입이 정상적으로 처리되었습니다";
+            log.text = "회원가입이 정상적으로 처리되었습니다 잠시 후 팝업이 종료됩니다";
+            TimeManager.Instance.StartCoroutine(TimeManager.Instance.TimerForAction(timerInterval, timerLimit, null, ClosePopup));
+
         }
         else
         {
@@ -106,7 +100,7 @@ public class SignUp : UI_Popup
         // ID가 중복이거나, 공란 혹은 생성 규칙에 어긋날 경우
         if (id.Equals(DataManager.Instance.SelectData("ID","Account",$"ID = '{id}'"))
             || id.Equals("")
-            || !idNormalPattern.IsMatch(id))
+            || !DataManager.Instance.idNormalPattern.IsMatch(id))
         {
             log.color = UIManager.Instance.errorLogColor;
             log.text = "사용불가";
@@ -127,7 +121,7 @@ public class SignUp : UI_Popup
         var password = GetInputField((int)InputFields.PasswordField).text;
         var confirmPassword = GetInputField((int)InputFields.ConfirmPasswordField).text;
 
-        if (password.Equals(confirmPassword) || passwordNormalPattern.IsMatch(confirmPassword)) return true;
+        if (password.Equals(confirmPassword) || DataManager.Instance.passwordNormalPattern.IsMatch(confirmPassword)) return true;
         else return false;
     }
 

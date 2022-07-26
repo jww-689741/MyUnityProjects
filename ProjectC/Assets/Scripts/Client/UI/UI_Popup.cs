@@ -15,4 +15,8 @@ public class UI_Popup : UI
     {
         UIManager.Instance.ClosePopup(this);
     }
+    public virtual void ClosePopup()
+    {
+        UIManager.Instance.ClosePopup(this);
+    }
 }

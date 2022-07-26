@@ -3,12 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class DataManager : Singleton<DataManager>
 {
     private string authenticationKey = "Server=192.168.219.132; Database=ProjectC; Uid=jww689741;Pwd =woo689741;";
     private SqlConnection database = new SqlConnection();
+
+    // 아이디 생성 규칙 정규식 ( 숫자, 영문자 최소 1개 이상, 최소 6문자 이상 )
+    public Regex idNormalPattern = new Regex(@"^(?=.*?[a-z])(?=.*?[0-9]).{6,}$", RegexOptions.IgnorePatternWhitespace);
+
+    // 비밀번호 생성 규칙 정규식 ( 숫자, 영문자, 특수문자 최소 1개 이상, 최소 10문자 이상 )
+    public Regex passwordNormalPattern = new Regex(@"^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{10,}$", RegexOptions.IgnorePatternWhitespace);
+
+    // 주민등록번호 규칙 정규식
+    public Regex rrnNormalPattern = new Regex(@"(\d{6}[ ,-]-?[1-4]\d{6})|(\d{6}[ ,-]?[1-4])", RegexOptions.IgnorePatternWhitespace);
 
     // 데이터베이스 연결
     private SqlConnection ConnectAndOpenDatabase()
@@ -30,7 +40,7 @@ public class DataManager : Singleton<DataManager>
             SqlDataReader result = query.ExecuteReader();
             while (result.Read())
             {
-                returnValue = result.ToString();
+                returnValue = result[0].ToString();
             }
             database.Close();
             return returnValue;
